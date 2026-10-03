@@ -26,6 +26,18 @@ pipeline {
       stage('Build and Push Image') {
          steps {
            sh 'docker image build -t ${REPOSITORY_TAG} .'
+           // The image is built on whichever node runs Jenkins, but the pod can be
+           // scheduled on any node. The registry is what makes it reachable from all
+           // of them. Single quotes keep Groovy from interpolating the secret.
+           withCredentials([usernamePassword(credentialsId: 'dockerhub',
+                                             usernameVariable: 'DOCKER_USER',
+                                             passwordVariable: 'DOCKER_PASS')]) {
+             sh '''
+               echo "$DOCKER_PASS" | docker login --username "$DOCKER_USER" --password-stdin
+               docker image push ${REPOSITORY_TAG}
+               docker logout
+             '''
+           }
          }
       }
 

@@ -18,7 +18,8 @@ spec:
         - name: SPRING_PROFILES_ACTIVE
           value: production-microservice
         image: ${REPOSITORY_TAG}
-        imagePullPolicy: Never
+        # BUILD_ID makes every tag unique, so a pull only ever happens once per build.
+        imagePullPolicy: IfNotPresent
         readinessProbe:
           httpGet:
             path: /
